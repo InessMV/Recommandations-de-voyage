@@ -7,13 +7,13 @@ output: html_document
 
 
 ```{r}
-
 # ==========================================================
 # PROJET : RECOMMANDATION DE VOYAGE
 # Description : Algorithme de scoring et filtrage prioritaire
 # ==========================================================
 
 # Chargement de la base de données
+# Assurez-vous que le fichier "travel_recommendations.csv" est dans votre dossier
 donnees <- read.csv("~/Library/CloudStorage/OneDrive-etu.unistra.fr/travel_recommendations.csv", stringsAsFactors = FALSE)
 
 # 1. DICTIONNAIRES DE TRADUCTION (Affichage FR <-> Données EN)
@@ -25,7 +25,7 @@ trad_comp <- c("En couple" = "couple", "En famille" = "family", "Entre amis" = "
 trad_clim <- c("Froid/Doux" = "cold/mild", "Chaud/Sec" = "hot/dry", "Humide" = "humid", 
                "Doux" = "mild", "Tropical" = "tropical", "Tropical/Chaud" = "tropical/warm", "Variable" = "variable")
 
-trad_frequent <- c("Animé" = "lively", "Modéré" = "Moderate", "Calme" = "quiet")
+trad_frequent <- c("Animé" = "lively", "Modéré" = "moderate", "Calme" = "quiet")
 
 trad_mois <- c("Janvier" = "January", "Février" = "February", "Mars" = "March", "Avril" = "April", 
                "Mai" = "May", "Juin" = "June", "Juillet" = "July", "Août" = "August", 
@@ -148,7 +148,6 @@ jeu_voyage <- function() {
 
 # Lancer le jeu
 jeu_voyage()
-
 ```
 
 
