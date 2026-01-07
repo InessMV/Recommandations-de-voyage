@@ -1,59 +1,156 @@
-# ===============================
-# 1. IMPORTATION DES DONNÉES
-# ===============================
-# Assurez-vous que le chemin du fichier est correct pour votre ordinateur
-donnees <- read.csv(
-  "~/Library/CloudStorage/OneDrive-etu.unistra.fr/travel_recommendations.csv",
-  stringsAsFactors = FALSE
-)
+---
+title: "Untitled"
+author: "Inês Magalhaes Vaz"
+date: "2026-01-07"
+output: html_document
+---
 
-# ===============================
-# 2. DICTIONNAIRES DE TRADUCTION
-# ===============================
-# J'ai ajouté les termes manquants comme "desert", "islands", etc.
-trad_category <- c(
-  "adventure" = "Aventure",
-  "beaches"   = "Plages",
-  "culture"   = "Culture",
-  "desert"    = "Désert",
-  "forest"    = "Forêt",
-  "islands"   = "Îles",
-  "mountains" = "Montagne",
-  "City"      = "Ville",
-  "Nature"    = "Nature",
-  "Beach"     = "Plage"
-)
 
-trad_companions <- c(
-  "Solo"    = "Seul(e)",
-  "Couple"  = "En couple",
-  "Friends" = "Entre amis",
-  "Family"  = "En famille"
-)
+```{r}
 
-trad_months <- c(
-  "Winter" = "Hiver",
-  "Spring" = "Printemps",
-  "Summer" = "Été",
-  "Autumn" = "Automne"
-)
+# ==========================================================
+# PROJET : RECOMMANDATION DE VOYAGE
+# Description : Algorithme de scoring et filtrage prioritaire
+# ==========================================================
 
-trad_climate <- c(
-  "Cold" = "Froid",
-  "Mild" = "Tempéré",
-  "Warm" = "Chaud"
-)
+# Chargement de la base de données
+donnees <- read.csv("~/Library/CloudStorage/OneDrive-etu.unistra.fr/travel_recommendations.csv", stringsAsFactors = FALSE)
 
-trad_crowd <- c(
-  "Low"    = "Faible",
-  "Medium" = "Moyen",
-  "High"   = "Élevé"
-)
+# 1. DICTIONNAIRES DE TRADUCTION (Affichage FR <-> Données EN)
+trad_cat <- c("Aventure" = "adventure", "Plages" = "beaches", "Culture" = "culture", 
+              "Désert" = "desert", "Forêt" = "forest", "Îles" = "islands", "Montagnes" = "mountains")
 
-trad_activities <- c(
-  "Relaxation"       = "Détente",
-  "Hiking"           = "Randonnée",
-  "Sightseeing"      = "Visites culturelles",
-  "Adventure sports" = "Sports d’aventure"
-)
+trad_comp <- c("En couple" = "couple", "En famille" = "family", "Entre amis" = "friends", "Seul(e)" = "solo")
+
+trad_clim <- c("Froid/Doux" = "cold/mild", "Chaud/Sec" = "hot/dry", "Humide" = "humid", 
+               "Doux" = "mild", "Tropical" = "tropical", "Tropical/Chaud" = "tropical/warm", "Variable" = "variable")
+
+trad_frequent <- c("Animé" = "lively", "Modéré" = "Moderate", "Calme" = "quiet")
+
+trad_mois <- c("Janvier" = "January", "Février" = "February", "Mars" = "March", "Avril" = "April", 
+               "Mai" = "May", "Juin" = "June", "Juillet" = "July", "Août" = "August", 
+               "Septembre" = "September", "Octobre" = "October", "Novembre" = "November", "Décembre" = "December")
+
+trad_act <- c("Balades en bateau" = "boat rides", "Promenades à chameau" = "camel rides", 
+              "Parcours historiques" = "heritage walks", "Randonnée" = "hiking", 
+              "Visites de musées" = "museum tours", "Marches en pleine nature" = "nature walks", 
+              "Parapente" = "paragliding", "Rafting" = "rafting", "Sandboarding" = "sandboarding", 
+              "Snorkeling" = "snorkeling", "Baignade" = "swimming", "Trekking" = "trekking", 
+              "Safari photo" = "wildlife safari")
+
+# Dictionnaires inverses pour l'affichage des résultats
+trad_cat_inv <- setNames(names(trad_cat), trad_cat)
+
+# 2. FONCTION POUR POSER LES QUESTIONS
+fonction_question <- function(question, dico) {
+  options_fr <- names(dico)
+  cat("\n", question, "\n")
+  for (i in seq_along(options_fr)) {
+    cat(i, ":", options_fr[i], "\n")
+  }
+  choix <- as.integer(readline(prompt = "Votre choix (numéro) : "))
+  if (is.na(choix) || choix < 1 || choix > length(options_fr)) {
+    cat("Choix invalide. Veuillez entrer un numéro de la liste.\n")
+    return(fonction_question(question, dico))
+  }
+  return(dico[choix]) # Retourne la valeur en anglais pour le traitement
+}
+
+# 3. FONCTION PRINCIPALE DU JEU
+jeu_voyage <- function() {
+  cat("====================================================\n")
+  cat("   BIENVENUE DANS VOTRE ASSISTANT VOYAGE PERSO !    \n")
+  cat("====================================================\n")
+
+  # Récupération des préférences
+  cat_choisie  <- fonction_question("Quel type de voyage souhaitez-vous faire ?", trad_cat)
+  comp_choisi  <- fonction_question("Avec qui comptez-vous partir ?", trad_comp)
+  mois_choisi  <- fonction_question("À quelle période souhaitez-vous voyager ?", trad_mois)
+  clim_choisi  <- fonction_question("Quel climat préférez-vous ?", trad_clim)
+  freq_choisie <- fonction_question("Quel niveau de fréquentation acceptez-vous ?", trad_frequent)
+  act_choisie  <- fonction_question("Quelle activité est la plus importante ?", trad_act)
+
+  # Calcul du Score
+  scores <- rep(0, nrow(donnees))
+  scores <- scores + (donnees$category == cat_choisie)
+  scores <- scores + (donnees$companions == comp_choisi)
+  scores <- scores + (donnees$climate == clim_choisi)
+  scores <- scores + (donnees$crowd_level == freq_choisie)
+  scores <- scores + grepl(mois_choisi, donnees$best_months)
+  scores <- scores + grepl(act_choisie, donnees$activities)
+
+  # Top 3
+  top_indices <- order(scores, decreasing = TRUE)[1:3]
+  top_voyages <- donnees[top_indices, ]
+
+  cat("\n----------------------------------------------------\n")
+  cat("LES 3 DESTINATIONS QUI VOUS CORRESPONDENT LE PLUS :\n")
+  for (i in 1:3) {
+    cat(i, ":", top_voyages$destination[i], "(Adéquation :", round((scores[top_indices[i]]/6)*100), "%)\n")
+  }
+  cat("----------------------------------------------------\n")
+
+  dest_pref <- top_voyages[1, ]
+  cat("\nVotre destination idéale est :", dest_pref$destination, "!\n")
+  cat("C'est un voyage de type '", trad_cat_inv[dest_pref$category], "' idéal en ", names(trad_mois)[trad_mois == mois_choisi], ".\n")
+
+  # Boucle de Satisfaction / Priorisation
+  repeat {
+    cat("\nÊtes-vous satisfait(e) de ce résultat ?\n")
+    cat("1: Oui, c'est parfait !\n")
+    cat("2: Non, je veux imposer 2 critères prioritaires\n")
+    satisfaction <- as.integer(readline(prompt = "Votre choix : "))
+    
+    if (!is.na(satisfaction) && satisfaction == 1) {
+      cat("\nSuper ! Bon voyage à", dest_pref$destination, "!\n")
+      return(NULL)
+    } else if (!is.na(satisfaction) && satisfaction == 2) {
+      break
+    } else {
+      cat("Entrée invalide.\n")
+    }
+  }
+
+  # Sélection des priorités
+  cat("\nQuels critères sont non-négociables pour vous ?\n")
+  noms_criteres <- c("Catégorie", "Compagnons", "Mois", "Climat", "Fréquentation", "Activité")
+  for (i in 1:length(noms_criteres)) { cat(i, ":", noms_criteres[i], "\n") }
+  
+  crit1 <- as.integer(readline(prompt = "Premier critère prioritaire (1-6) : "))
+  crit2 <- as.integer(readline(prompt = "Deuxième critère prioritaire (1-6) : "))
+
+  # Vérification des critères stricts
+  verifier <- function(idx, num) {
+    if (num == 1) return(donnees$category[idx] == cat_choisie)
+    if (num == 2) return(donnees$companions[idx] == comp_choisi)
+    if (num == 3) return(grepl(mois_choisi, donnees$best_months[idx]))
+    if (num == 4) return(donnees$climate[idx] == clim_choisi)
+    if (num == 5) return(donnees$crowd_level[idx] == freq_choisie)
+    if (num == 6) return(grepl(act_choisie, donnees$activities[idx]))
+    return(TRUE)
+  }
+
+  respectent_strict <- sapply(1:nrow(donnees), function(i) verifier(i, crit1) && verifier(i, crit2))
+
+  if (any(respectent_strict)) {
+    possibilites <- donnees[respectent_strict, ]
+    scores_filtres <- scores[respectent_strict]
+    meilleur_index <- order(scores_filtres, decreasing = TRUE)[1]
+    
+    cat("\n[FILTRE APPLIQUÉ] Voici la meilleure destination respectant strictement vos priorités :\n")
+    cat("==>", possibilites$destination[meilleur_index], "<==\n")
+    cat("Merci d'avoir joué ! Bon voyage !\n")
+  } else {
+    cat("\nDésolé, aucune destination ne peut satisfaire ces deux critères en même temps.\n")
+    cat("Conseil : Essayez de choisir un climat 'Doux' ou un mois différent.\n")
+  }
+}
+
+# Lancer le jeu
+jeu_voyage()
+
+```
+
+
+
 
