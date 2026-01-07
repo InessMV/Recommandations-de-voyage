@@ -1,1 +1,59 @@
+# ===============================
+# 1. IMPORTATION DES DONNÉES
+# ===============================
+# Assurez-vous que le chemin du fichier est correct pour votre ordinateur
+donnees <- read.csv(
+  "~/Library/CloudStorage/OneDrive-etu.unistra.fr/travel_recommendations.csv",
+  stringsAsFactors = FALSE
+)
+
+# ===============================
+# 2. DICTIONNAIRES DE TRADUCTION
+# ===============================
+# J'ai ajouté les termes manquants comme "desert", "islands", etc.
+trad_category <- c(
+  "adventure" = "Aventure",
+  "beaches"   = "Plages",
+  "culture"   = "Culture",
+  "desert"    = "Désert",
+  "forest"    = "Forêt",
+  "islands"   = "Îles",
+  "mountains" = "Montagne",
+  "City"      = "Ville",
+  "Nature"    = "Nature",
+  "Beach"     = "Plage"
+)
+
+trad_companions <- c(
+  "Solo"    = "Seul(e)",
+  "Couple"  = "En couple",
+  "Friends" = "Entre amis",
+  "Family"  = "En famille"
+)
+
+trad_months <- c(
+  "Winter" = "Hiver",
+  "Spring" = "Printemps",
+  "Summer" = "Été",
+  "Autumn" = "Automne"
+)
+
+trad_climate <- c(
+  "Cold" = "Froid",
+  "Mild" = "Tempéré",
+  "Warm" = "Chaud"
+)
+
+trad_crowd <- c(
+  "Low"    = "Faible",
+  "Medium" = "Moyen",
+  "High"   = "Élevé"
+)
+
+trad_activities <- c(
+  "Relaxation"       = "Détente",
+  "Hiking"           = "Randonnée",
+  "Sightseeing"      = "Visites culturelles",
+  "Adventure sports" = "Sports d’aventure"
+)
 
