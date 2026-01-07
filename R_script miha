@@ -1,144 +1,128 @@
 ---
-title: "VOYAGE"
-author: "RALANTOMALALA Kanto"
+title: "Assistant de recommandation de voyages"
+author: "Kanto, Ines, Lucas"
 date: "2026-01-07"
-output: html_document
+output:
+  slidy_presentation: default
+  beamer_presentation: default
+  ioslides_presentation: default
 ---
 
-```{r warning=FALSE, message=FALSE}
-rm(list = ls())
+## Contexte du projet
 
-# Importation de la base de données
-donnees <- read.csv("~/Desktop/Master 2025-2026/travel_recommendations.csv", stringsAsFactors = FALSE)
-View(donnees)
+- Projet réalisé sous **R** avec le package **Shiny**
+- Objectif : proposer des destinations de voyage personnalisées
+- Basé sur les préférences déclarées par l’utilisateur
 
-# Fonction générique pour poser une question à l'ulisateur
-fonction_question <- function(question, options) {
-  cat("\n", question, "\n")
-    # Affiche la question 
-  for (i in seq_along(options)) {
-    cat(i, ":", options[i], "\n")
-    #Affiche toutes les options possibles avec un numéro pour que l'utilisateur choisisse
-  }
-  choix <- as.integer(readline(prompt = "Votre choix (numéro) : "))
-   # Récupère le choix de l'utilisateur  
-  if (is.na(choix) || choix < 1 || choix > length(options)) {
-    cat("Choix invalide. Veuillez réessayer.\n")
-    return(fonction_question(question, options))
-    # Vérifie que le choix est valide (numéro entre 1 et nombre d'options)
-  }
-  return(options[choix])
-}
+L’application agit comme un **outil d’aide à la décision interactif**.
 
-# Fonction principale du jeu
-jeu_voyage <- function() {
-  cat("Bienvenue dans le jeu de recommandation de destination de voyage !\n")
-  
-  # Définition des modalités possibles pour chaque critère
-  category_ordre   <- unique(donnees$category)
-  companions_ordre <- unique(donnees$companions)
-  mois_ordre <- c("January","February","March","April","May","June",
-                  "July","August","September","October","November","December")
-  climate_ordre <- unique(donnees$climate)
-  crowd_ordre   <- unique(donnees$crowd_level)
-  activities_ordre <- unique(donnees$activities)
-  
-  # Pose des questions à l'utilisateur et récupère ses choix 
-  category_choisi <- fonction_question("Quel type de voyage souhaitez-vous faire ?", category_ordre)
-  companions_choisi <- fonction_question("Avec qui comptez-vous partir ?", companions_ordre)
-  mois_choisi <- fonction_question("Quel mois souhaitez-vous choisir pour votre voyage ?", mois_ordre)
-  climate_choisi <- fonction_question("Quel climat préférez-vous pour votre voyage ?", climate_ordre)
-  crowd_choisi <- fonction_question("Quel niveau de fréquentation touristique êtes-vous prêt(e) à accepter ?", crowd_ordre)
-  activities_choisie <- fonction_question("Quelle activité est la plus importante pour vous pendant ce voyage ?", activities_ordre)
-  
-  # Poids pour chaque critère
-  poids <- c(category=3, companions=2, month=2, climate=1, crowd=2, activities=3)
-  
-  # Calcul du score pour chaque ligne de la base 
-  donnees$score <- mapply(function(dest, cat, comp, mois, clim, crowd, act) {
-    score <- 0
-    # Vérifie chaque critère et ajoute le poids si la destination correspond au choix de l'utilisateur
-    if (any(cat == category_choisi)) score <- score + poids["category"]
-    if (any(comp == companions_choisi)) score <- score + poids["companions"]
-    if (any(grepl(mois_choisi, mois, ignore.case=TRUE))) score <- score + poids["month"]
-    if (any(clim == climate_choisi)) score <- score + poids["climate"]
-    if (any(crowd == crowd_choisi)) score <- score + poids["crowd"]
-    if (any(act == activities_choisie)) score <- score + poids["activities"]
-    return(score)
-  }, donnees$destination, donnees$category, donnees$companions, donnees$best_months,
-     donnees$climate, donnees$crowd_level, donnees$activities)
-  
-  # Agréger les scores par destination pour gérer les doublons 
-  scores <- aggregate(score ~ destination, data=donnees, sum)
-  # Si une destination apparâit plusieurs fois, on additionne les scores pour obtenir un score global
-  
-  # Top 3 destinations
-  top3 <- head(scores[order(scores$score, decreasing=TRUE),], 3)
-  
-  # Affichage top 3 avec explication
-  cat("\nVoici votre top 3 des destinations :\n")
-  for (i in 1:nrow(top3)) {
-    dest <- top3$destination[i]
-    score <- top3$score[i]
-    cat("\n-", dest, "(Score:", score, ")\n")
-    
-    cat("  Correspondance :")
-    if (any(donnees$category[donnees$destination==dest]==category_choisi)) cat(" Type de voyage ✅")
-    if (any(donnees$companions[donnees$destination==dest]==companions_choisi)) cat(", Compagnons ✅")
-    if (any(grepl(mois_choisi, donnees$best_months[donnees$destination==dest], ignore.case=TRUE))) cat(", Mois ✅")
-    if (any(donnees$climate[donnees$destination==dest]==climate_choisi)) cat(", Climat ✅")
-    if (any(donnees$crowd_level[donnees$destination==dest]==crowd_choisi)) cat(", Fréquentation ✅")
-    if (any(donnees$activities[donnees$destination==dest]==activities_choisie)) cat(", Activité ✅")
-    
-    if ("link" %in% colnames(donnees)) {
-      cat("\n  Plus d'infos :", donnees$link[donnees$destination==dest])
-    }
-    cat("\n")
-  }
-  
-  # Destination idéale 
-  cat("\nVotre destination idéale est :", top3$destination[1], "\n")
-  cat("Bon voyage ✈️🌍\n")
-  
-  # Option : prioriser 2 critères
-  cat("\nVoulez-vous prioriser certains critères pour votre destination ?\n")
-  cat("1: Non, le top 3 me suffit\n2: Oui, je veux prioriser 2 critères\n")
-  choix_priorite <- as.integer(readline(prompt="Votre choix : "))
-  
-  if (choix_priorite == 2) {
-    cat("\nChoisissez deux critères à respecter absolument :\n")
-    cat("1: Type de voyage\n2: Compagnons\n3: Mois\n4: Climat\n5: Niveau de fréquentation\n6: Activité\n")
-    critere1 <- as.integer(readline(prompt="Premier critère : "))
-    critere2 <- as.integer(readline(prompt="Deuxième critère : "))
-    
-    # Fonction pour vérifier les critères prioritaires
-    respecter_criteres <- function(dest) {
-      c1_ok <- if (critere1 == 1) any(donnees$category[donnees$destination==dest]==category_choisi) else
-               if (critere1 == 2) any(donnees$companions[donnees$destination==dest]==companions_choisi) else
-               if (critere1 == 3) any(grepl(mois_choisi, donnees$best_months[donnees$destination==dest], ignore.case=TRUE)) else
-               if (critere1 == 4) any(donnees$climate[donnees$destination==dest]==climate_choisi) else
-               if (critere1 == 5) any(donnees$crowd_level[donnees$destination==dest]==crowd_choisi) else
-               if (critere1 == 6) any(donnees$activities[donnees$destination==dest]==activities_choisie)
-      
-      c2_ok <- if (critere2 == 1) any(donnees$category[donnees$destination==dest]==category_choisi) else
-               if (critere2 == 2) any(donnees$companions[donnees$destination==dest]==companions_choisi) else
-               if (critere2 == 3) any(grepl(mois_choisi, donnees$best_months[donnees$destination==dest], ignore.case=TRUE)) else
-               if (critere2 == 4) any(donnees$climate[donnees$destination==dest]==climate_choisi) else
-               if (critere2 == 5) any(donnees$crowd_level[donnees$destination==dest]==crowd_choisi) else
-               if (critere2 == 6) any(donnees$activities[donnees$destination==dest]==activities_choisie)
-      
-      return(c1_ok & c2_ok)
-    }
-    
-    destinations_filtrees <- top3$destination[sapply(top3$destination, respecter_criteres)]
-    if (length(destinations_filtrees) > 0) {
-      cat("\nVotre top 1 respectant vos critères : ", destinations_filtrees[1], "\n")
-    } else {
-      cat("\nAucune destination ne respecte parfaitement vos critères, voici le top général.\n")
-    }
-  }
-}
+---
+## Les packages et library utilisés 
+install.packages("shiny")
+install.packages("readr")
+install.packages("shinythemes")
+library(shiny)
+library(shinythemes)
 
-# Lancer le jeu
-jeu_voyage()
-```
+---
+## Données utilisées
+- Base de données contenant des destinations touristiques 
+- Variables principales :
+  - catégorie de voyage ( aventure, culture, montagne,...)
+  - accompagnants (en famille, en couple, seul(e) )
+  - climat (tropical, humide,...)
+  - niveau de fréquentation (calme, animé, modéré)
+  - mois idéaux
+  - activités proposées (visites de musées, baignade,...)
+  
+---
+## Problème linguistique
+- Interface utilisateur en **français**
+- Données stockées en **anglais**
+ Risque d’incohérence entre choix utilisateur et données 
+ Solution : création de dictionnaires detraduction 
+---
+
+## Choix des préférences
+
+L’utilisateur sélectionne :
+- type de voyage
+- accompagnants
+- mois de départ
+- climat préféré
+- fréquentation
+- activité favorite
+
+Ces choix constituent les **critères de recommandation**.
+
+---
+
+## Logique générale de l’application
+
+1. Traduction des préférences utilisateur
+2. Comparaison avec chaque destination
+3. Calcul d’un score
+4. Classement des destinations
+5. Affichage des meilleurs résultats
+
+---
+
+## Méthode de scoring
+
+- Chaque critère respecté ajoute **1 point**
+- Score maximal possible : **6**
+- Tous les critères ont le même poids
+
+---
+
+## Sélection des destinations
+
+- Les destinations sont triées par score décroissant
+- Les **3 meilleures** sont conservées
+- Calcul d’un pourcentage d’adéquation :
+  
+\[
+Adéquation = \frac{score}{6} \times 100
+\]
+
+
+---
+
+## Affichage des résultats
+
+- Résultats présentés sous forme de tableau
+- Affichage automatique des colonnes
+- Indicateur d’adéquation en pourcentage
+
+---
+
+## Fonctionnalité avancée
+
+Si l’utilisateur n’est pas satisfait :
+- possibilité d’imposer **2 critères prioritaires**
+- ces critères deviennent stricts
+- seules les destinations respectant ces critères sont retenues
+
+
+## Apports du projet
+ Utilisation de **R Shiny**
+
+---
+
+## Limites du projet
+- Les résultats dépendent fortement de la **qualité et de la richesse de la base de données**.
+- Aucune **contrainte budgétaire ou géographique** n’est prise en compte.
+- L’utilisateur ne peut sélectionner **qu’une seule option par critère**.
+- Il n’est pas possible d’être **indifférent** ou de ne pas exprimer de préférence.
+
+## Pistes d’amélioration
+- Intégration de **contraintes budgétaires** et de la **durée du séjour**.
+- **Enrichissement de la base de données** pour améliorer la pertinence des recommandations.
+- Proposition d’options de **transport ou de vols** adaptées à la destination.
+---
+
+## Conclusion
+L’application développée constitue un outil simple,
+personnalisable et évolutif d’aide à la décision.
+
+
