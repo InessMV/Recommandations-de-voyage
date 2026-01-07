@@ -1,6 +1,14 @@
-install.packages("shiny")
-install.packages("readr")
-install.packages("shinythemes")
+---
+title: "Untitled"
+author: "..."
+date: "2026-01-07"
+output: html_document
+---
+
+```{r}
+#install.packages("shiny")
+#install.packages("readr")
+#install.packages("shinythemes")
 library(shiny)
 library(shinythemes)
 
@@ -114,8 +122,8 @@ server <- function(input, output, session) {
       hr(),
       h4("⚙️ Pas satisfait ? Imposez 2 critères prioritaires"),
       fluidRow(
-        column(6, selectInput("crit1", "Priorité 1", choices = list("Catégorie"=1, "Compagnons"=2, "Mois"=3, "Climat"=4, "Fréquentation"=5, "Activité"=6))),
-        column(6, selectInput("crit2", "Priorité 2", choices = list("Catégorie"=1, "Compagnons"=2, "Mois"=3, "Climat"=4, "Fréquentation"=5, "Activité"=6)))
+        column(6, selectInput("crit1", "Priorité 1", choices = list("Type de voyage"=1, "accompagnant"=2, "Mois"=3, "Climat"=4, "Fréquentation"=5, "Activité"=6))),
+        column(6, selectInput("crit2", "Priorité 2", choices = list("Type de voyage"=1, "accompagnant"=2, "Mois"=3, "Climat"=4, "Fréquentation"=5, "Activité"=6)))
       ),
       actionButton("prio_btn", "Appliquer le filtre strict", class = "btn-warning"),
       br(), br(),
@@ -151,3 +159,5 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
+```
+
