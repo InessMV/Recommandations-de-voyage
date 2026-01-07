@@ -1,6 +1,6 @@
 plan
-Quel type de voyage souhaitez-vous faire ? 
-A quelle période souhaitez-vous voyager ? 
-Quel climat préférez-vous pour votre voyage ?
-Quel niveau de fréquentation touristique êtes-vous prêt(e) à accepter ?
-Quelle activité est la plus importante pour vous pendant ce voyage ?
+Quel type de voyage souhaitez-vous faire ? category
+A quelle période souhaitez-vous voyager ? best-months
+Quel climat préférez-vous pour votre voyage ? climate
+Quel niveau de fréquentation touristique êtes-vous prêt(e) à accepter ? crowd_level
+Quelle activité est la plus importante pour vous pendant ce voyage ? activities 
