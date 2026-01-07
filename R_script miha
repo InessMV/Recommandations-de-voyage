@@ -1,21 +1,24 @@
 ```{r warning=FALSE, message=FALSE}
 rm(list = ls())
 
-# Importation de la base
+# Importation de la base de données
 donnees <- read.csv("~/Desktop/Master 2025-2026/travel_recommendations.csv", stringsAsFactors = FALSE)
 View(donnees)
 
-# Fonction générique pour poser une question
+# Fonction généri5que pour poser une question à l'ulisateur
 fonction_question <- function(question, options) {
   cat("\n", question, "\n")
+    # Affiche la question 
   for (i in seq_along(options)) {
     cat(i, ":", options[i], "\n")
+    #Affiche toutes les options possibles avec un numéro pour que l'utilisateur choisisse
   }
   choix <- as.integer(readline(prompt = "Votre choix (numéro) : "))
-  
+   # Récupère le choix de l'utilisateur  
   if (is.na(choix) || choix < 1 || choix > length(options)) {
     cat("Choix invalide. Veuillez réessayer.\n")
     return(fonction_question(question, options))
+    # Vérifie que le choix est valide (numéro entre 1 et nombre d'options)
   }
   return(options[choix])
 }
@@ -24,7 +27,7 @@ fonction_question <- function(question, options) {
 jeu_voyage <- function() {
   cat("Bienvenue dans le jeu de recommandation de destination de voyage !\n")
   
-  # Modalités DISTINCTES
+  # Définition des modalités possibles pour chaque critère
   category_ordre   <- unique(donnees$category)
   companions_ordre <- unique(donnees$companions)
   mois_ordre <- c("January","February","March","April","May","June",
@@ -33,7 +36,7 @@ jeu_voyage <- function() {
   crowd_ordre   <- unique(donnees$crowd_level)
   activities_ordre <- unique(donnees$activities)
   
-  # Questions
+  # Pose des questions à l'utilisateur et récupère ses choix 
   category_choisi <- fonction_question("Quel type de voyage souhaitez-vous faire ?", category_ordre)
   companions_choisi <- fonction_question("Avec qui comptez-vous partir ?", companions_ordre)
   mois_choisi <- fonction_question("Quel mois souhaitez-vous choisir pour votre voyage ?", mois_ordre)
@@ -42,11 +45,12 @@ jeu_voyage <- function() {
   activities_choisie <- fonction_question("Quelle activité est la plus importante pour vous pendant ce voyage ?", activities_ordre)
   
   # Poids pour chaque critère
-  poids <- c(category=3, companions=2, month=2, climate=1, crowd=1, activities=3)
+  poids <- c(category=3, companions=2, month=2, climate=1, crowd=2, activities=3)
   
-  # Calcul du score pour chaque ligne
+  # Calcul du score pour chaque ligne de la base 
   donnees$score <- mapply(function(dest, cat, comp, mois, clim, crowd, act) {
     score <- 0
+    # Vérifie chaque critère et ajoute le poids si la destination correspond au choix de l'utilisateur
     if (any(cat == category_choisi)) score <- score + poids["category"]
     if (any(comp == companions_choisi)) score <- score + poids["companions"]
     if (any(grepl(mois_choisi, mois, ignore.case=TRUE))) score <- score + poids["month"]
@@ -57,8 +61,9 @@ jeu_voyage <- function() {
   }, donnees$destination, donnees$category, donnees$companions, donnees$best_months,
      donnees$climate, donnees$crowd_level, donnees$activities)
   
-  # Agréger les scores par destination
+  # Agréger les scores par destination pour gérer les doublons 
   scores <- aggregate(score ~ destination, data=donnees, sum)
+  # Si une destination apparâit plusieurs fois, on additionne les scores pour obtenir un score global
   
   # Top 3 destinations
   top3 <- head(scores[order(scores$score, decreasing=TRUE),], 3)
@@ -84,6 +89,7 @@ jeu_voyage <- function() {
     cat("\n")
   }
   
+  # Destination idéale 
   cat("\nVotre destination idéale est :", top3$destination[1], "\n")
   cat("Bon voyage ✈️🌍\n")
   
