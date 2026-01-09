@@ -147,3 +147,6 @@ verifier <- function(idx, num) {
 - **Enrichissement de la base de données** pour améliorer la pertinence des recommandations.
 - Proposition d’options de **transport ou de vols** adaptées à la destination.
 ---
+## Conclusion
+L’application développée constitue un outil simple,
+personnalisable et évolutif d’aide à la décision.
