@@ -1,121 +1,148 @@
 ---
-title: "Assistant de recommandation de voyages"
+title: "Présentation finale"
 author: "Kanto, Ines, Lucas"
-date: "2026-01-07"
-output:
-  slidy_presentation: default
-  beamer_presentation: default
-  ioslides_presentation: default
+date: "2026-01-09"
+output: ioslides_presentation
 ---
 
-## Contexte du projet
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+## 🌍 Présentation du projet
 
-- Projet réalisé sous **R** avec le package **Shiny**
-- Objectif : proposer des destinations de voyage personnalisées
-- Basé sur les préférences déclarées par l’utilisateur
+### 🎯 Objectifs
 
-L’application agit comme un **outil d’aide à la décision interactif**.
-
----
-## Les packages et library utilisés 
-install.packages("shiny")
-install.packages("readr")
-install.packages("shinythemes")
-library(shiny)
-library(shinythemes)
+L’objectif de ce projet est de développer une **application interactive de recommandation de destinations touristiques**.
 
 ---
-## Données utilisées
-- Base de données contenant des destinations touristiques 
-- Variables principales :
-  - catégorie de voyage ( aventure, culture, montagne,...)
-  - accompagnants (en famille, en couple, seul(e) )
-  - climat (tropical, humide,...)
-  - niveau de fréquentation (calme, animé, modéré)
-  - mois idéaux
-  - activités proposées (visites de musées, baignade,...)
+## Logique générale de l'application 
+Le fonctionnement de l’application repose sur les étapes suivantes :
+1. Traduction des choix de l’utilisateur  
+2. Attribution d’un score à chaque destination  
+3. Sélection des **3 meilleures destinations**  
+4. Affichage des résultats sous forme de tableau  
+5. Application d’un filtrage strict si nécessai
+---
+## Données utilisées 
+Les données proviennent d’un fichier CSV contenant :
+
+- Destination  
+
+- Type de voyage  
+
+- Climat  
+
+- Activités proposées 
+
+- Mois recommandés
+
+- Niveau de fréquentation 
+
+- Type d’accompagnants
+
+## Librairies utilisées
+- **Shiny** : interface web interactive
+- **Shinythemes** : thèmes graphiques pour améliorer le design 
+
+---
+## Dictionnaires de traduction
+Ces dictionnaires permettent d'assurer la correspondance entre les choix de l'ulisateur et des données. 
+---
+
+## 🖥️ Interface utilisateur (UI)
+L’interface utilisateur est organisée en deux parties :
+- **Panneau latéral** : saisie des préférences de voyage (type de voyage, climat, activité, etc.)
+- **Panneau principal** : affichage des destinations recommandées et des filtres avancés
+
+```{r cars, echo=TRUE, results='hide'}
+ui <- fluidPage(
+  theme = shinytheme("flatly"),
   
----
-## Problème linguistique
-- Interface utilisateur en **français**
-- Données stockées en **anglais**
- Risque d’incohérence entre choix utilisateur et données 
- Solution : création de dictionnaires detraduction 
----
-
-## Choix des préférences
-
-L’utilisateur sélectionne :
-- type de voyage
-- accompagnants
-- mois de départ
-- climat préféré
-- fréquentation
-- activité favorite
-
-Ces choix constituent les **critères de recommandation**.
-
----
-
-## Logique générale de l’application
-
-1. Traduction des préférences utilisateur
-2. Comparaison avec chaque destination
-3. Calcul d’un score
-4. Classement des destinations
-5. Affichage des meilleurs résultats
-
----
-
-## Méthode de scoring
-
-- Chaque critère respecté ajoute **1 point**
-- Score maximal possible : **6**
-- Tous les critères ont le même poids
-
----
-
-## Sélection des destinations
-
-- Les destinations sont triées par score décroissant
-- Les **3 meilleures** sont conservées
-- Calcul d’un pourcentage d’adéquation :
+  titlePanel("🌍 Assistant Voyage Personnel"),
   
-\[
-Adéquation = \frac{score}{6} \times 100
-\]
-
-
+  sidebarLayout(
+    sidebarPanel(
+      h4("✈️ Vos préférences"),
+      selectInput("cat","Type de voyage :",choices=names(trad_cat)),
+      selectInput("comp","Accompagnants :",choices=names(trad_comp)),
+      selectInput("mois","Mois de départ :",choices=names(trad_mois)),
+      selectInput("clim","Climat préféré :",choices=names(trad_clim)),
+      selectInput("freq","Fréquentation :",choices=names(trad_frequent)),
+      selectInput("act","Activité favorite :",choices=names(trad_act)),
+      actionButton("go","Trouver ma destination ✈️",class="btn-success",width="100%")
+    ),
+    
+    mainPanel(
+      h3("🏝️ Nos suggestions pour vous"),
+      uiOutput("message_vide"),
+      tableOutput("resultats"),
+      uiOutput("prio_ui")
+    )
+  )
+)
+```
 ---
-
-## Affichage des résultats
-
-- Résultats présentés sous forme de tableau
-- Affichage automatique des colonnes
-- Indicateur d’adéquation en pourcentage
-
+## Serveur 
+### Variable qui stocke les résultats
+```{r cars1, echo=TRUE, results='hide'}
+server <- function(input, output, session) {
+  
+  valeurs <- reactiveValues(top_voyages=NULL, scores=NULL)
+    observeEvent(input$go, {
+```
 ---
+### Calcul des scores et recommandations 
+ Initialisation du score pour chaque destination
+```{r cars3, echo=TRUE, results='hide'}
+scores <- rep(0, nrow(donnees))
 
-## Fonctionnalité avancée
-
-Si l’utilisateur n’est pas satisfait :
-- possibilité d’imposer **2 critères prioritaires**
-- ces critères deviennent stricts
-- seules les destinations respectant ces critères sont retenues
-
-
-## Apports du projet
- Utilisation de **R Shiny**
-
+scores <- scores + (tolower(donnees$category) == req_cat)
+scores <- scores + (tolower(donnees$companions) == req_comp)
+scores <- scores + (tolower(donnees$climate) == req_clim)
+scores <- scores + (tolower(donnees$crowd_level) == req_freq)
+scores <- scores + grepl(req_mois, donnees$best_months, ignore.case = TRUE)
+scores <- scores + grepl(req_act, donnees$activities, ignore.case = TRUE
+                        
+```
 ---
-
-## Limites du projet
+Sélection des 3 meilleures destinations
+```{r cars4, echo=TRUE, results='hide'}
+top_indices <- order(scores, decreasing = TRUE)[1:3]
+res <- donnees[top_indices, ]
+Calcul du taux d'adéquation en pourcentage
+res$Adequation <- paste0(round((scores[top_indices] / 6) * 100), "%")
+```
+---
+### Filtres 
+Cette fonctionnalité est activée lorsque l'utilisateur n'est pas satisfait
+des destinations proposées dans le Top 3.
+```{r cars5, echo=TRUE, results='hide'}
+#Vérifie si une destination (idx) respecte un critère donnée (num) 
+verifier <- function(idx, num) {
+  if (num == 1) return(tolower(donnees$category[idx]) == trad_cat[input$cat])
+  if (num == 2) return(tolower(donnees$companions[idx]) == trad_comp[input$comp])
+  if (num == 3) return(grepl(trad_mois[input$mois], donnees$best_months[idx], ignore.case = TRUE))
+  if (num == 4) return(tolower(donnees$climate[idx]) == trad_clim[input$clim])
+  if (num == 5) return(tolower(donnees$crowd_level[idx]) == trad_frequent[input$freq])
+  if (num == 6) return(grepl(trad_act[input$act], donnees$activities[idx], ignore.case = TRUE))
+  return(TRUE)
+}
+    # Application simultanée des deux critères prioritaires
+    strict <- sapply(
+      1:nrow(donnees),
+      function(i)
+        verifier(i, as.numeric(input$crit1)) &&
+        verifier(i, as.numeric(input$crit2))
+    )
+```
+---
+### Limites 
 - Les résultats dépendent fortement de la **qualité et de la richesse de la base de données**.
 - Aucune **contrainte budgétaire ou géographique** n’est prise en compte.
 - L’utilisateur ne peut sélectionner **qu’une seule option par critère**.
 - Il n’est pas possible d’être **indifférent** ou de ne pas exprimer de préférence.
 
-## Pistes d’amélioration
+### Amélioration 
 - Intégration de **contraintes budgétaires** et de la **durée du séjour**.
 - **Enrichissement de la base de données** pour améliorer la pertinence des recommandations.
 - Proposition d’options de **transport ou de vols** adaptées à la destination.
