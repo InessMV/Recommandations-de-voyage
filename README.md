@@ -7,7 +7,7 @@ Pour vous aider à choisir votre prochain lieu de vacances, nous avons réalisé
 Nous avons répertorié une base de données sur RStudio afin de créer un **Assistant de Voyage Personnel avec plusieurs facteurs**. 
 Pour que cet assistant puisse déterminer votre prochain lieu de vacances, il faut télécharger le script R et la base de données ci-joint. 
 Une fois installés, il suffit de lancer le modèle pour qu'une page s'ouvre vous demandant de renseigner vos différents critères. Vous recevrez alors une **liste de trois destinations** correspondant le mieux à vos attentes.  
-Pour affiner votre choix, un onglet permet de sélectionner deux critères les plus pertinentes selon vos envies. 
+Pour affiner votre choix, un onglet permet de sélectionner deux critères les plus pertinents selon vos envies. 
 
 Voici les facteurs utilisés pour notre Assistant de Voyage Personnel : 
 
@@ -20,7 +20,7 @@ Voici les facteurs utilisés pour notre Assistant de Voyage Personnel :
 
 Dès le départ, il a fallu traduire notre base de données qui provenait du site **"Kaggle"** pour qu'elle puisse répondre aux attentes des 40 millions de voyageurs francophones. Ensuite, nous avons construit l'Assistant de Voyage Personnel.
 Pour élaborer cet outil, nous l'avons construit afin qu'il puisse annoncer trois destinations qui se rapprochent le plus des critères renseignés. 
-Nous avons également mis un score exprimé en pourcentage pour indiquer la compatibilité pour chaque destination, exprimé en pourcentage, afin de faciliter le choix de l'utilisateur.
+Nous avons également mis un score exprimé en pourcentage pour indiquer la compatibilité pour chaque destination, afin de faciliter le choix de l'utilisateur.
 Une fois les trois destinations proposées, l’outil offre la possibilité de sélectionner les deux critères prioritaires, afin de désigner la meilleure destinartion du voyage.
 
 De la part de l'Assistant de Voyage Personnel ainsi que de notre équipe, **nous vous souhaitons un excellent voyage** !
