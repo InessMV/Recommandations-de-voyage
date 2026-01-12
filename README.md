@@ -21,6 +21,6 @@ Voici les facteurs utilisés pour notre Assistant de Voyage Personnel :
 Dès le départ, il a fallu traduire notre base de données qui provenait du site **"Kaggle"** pour qu'elle puisse répondre aux attentes des 40 millions de voyageurs francophones. Ensuite, nous avons construit l'Assistant de Voyage Personnel.
 Pour élaborer cet outil, nous l'avons construit afin qu'il puisse annoncer trois destinations qui se rapprochent le plus des critères renseignés. 
 Nous avons également mis un score exprimé en pourcentage pour indiquer la compatibilité pour chaque destination, afin de faciliter le choix de l'utilisateur.
-Une fois les trois destinations proposées, l’outil offre la possibilité de sélectionner les deux critères prioritaires, afin de désigner la meilleure destinartion du voyage.
+Une fois les trois destinations proposées, l’outil offre la possibilité de sélectionner les deux critères prioritaires, ce qui désigne la destination qui correspond le mieux à votre style de voyage
 
 De la part de l'Assistant de Voyage Personnel ainsi que de notre équipe, **nous vous souhaitons un excellent voyage** !
