@@ -1,6 +1,7 @@
 **Assistant de Voyage Personnel**
 
-Un sondage révèlait que 6 Français sur 10 désiraient se rendre en vacances lors de l'année 2025. 
+Un sondage révèlait que 6 Français sur 10 désiraient se rendre en vacances lors de l'année 2025.
+
 **Pour cette année 2026, êtes-vous plus voyage à la montagne ou bien voyage à la plage ?** 
 Pour vous aider à choisir votre prochain lieu de vacances, nous avons réalisé un outil permettant d'aiguiller plus de 40 millions de Français à choisir leur destination pour leurs prochaines vacances en fonction de leurs critères.🚂
 
