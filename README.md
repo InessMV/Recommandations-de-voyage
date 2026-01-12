@@ -1,6 +1,10 @@
-Un sondage révèlait que 6 Français sur 10 désiraient se rendre en vacances lors de l'année 2025. Pour cette année 2026, nous avons réalisé un projet qui apporte un outil permettant d'aiguiller plus de 40 millions de français à choisir la destination des prochaines vacances en se rapprochant le plus possible de leurs critères.🚂
+**Assistant de Voyage Personnel**
 
-Nous avons répértoriés une base de données sur RStudio afin de créer un Assistant de Voyage Personnel avec plusieurs facteurs. Pour utiliser cet assistant à déterminer votre prochain lieu de vacances, il faut télécharger le code RStudio ainsi que la base données ci-joint. 
+Un sondage révèlait que 6 Français sur 10 désiraient se rendre en vacances lors de l'année 2025. 
+Pour cette année 2026, êtes-vous plus voyage à la montagne ou bien voyage à la plage ? 
+Pour vous aider à choisir votre prochain lieu de vacances, nous avons réalisé un outil permettant d'aiguiller plus de 40 millions de français à choisir la destination des prochaines vacances en se rapprochant le plus possible de leurs critères.🚂
+
+Nous avons répértoriés une base de données sur RStudio afin de créer un **Assistant de Voyage Personnel avec plusieurs facteurs**. Pour que cet assistant puisse déterminer votre prochain lieu de vacances, il faut télécharger le code RStudio ainsi que la base de données ci-joint. 
 Une fois le script R et la base de donnéees installées, il suffit de lancer le modèle pour qu'une page s'ouvre vous demandant de renseigner vos différents critères. Dès lors, vous recevrez une liste de trois lieux répondants à vos éléments. 
 Si vous voulez peaufiner davantage, un onglet apparait pour mentionner les deux catégories qui sont les plus pertinentes selon vos envies. 
 
