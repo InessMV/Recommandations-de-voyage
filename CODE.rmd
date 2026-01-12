@@ -1,0 +1,167 @@
+---
+title: "Assistant de voyage personnel"
+author: "Ines VAZ, Kanto RALANTOMALALA, Lucas RAKOTOMALALA"
+date: "2026-01-07"
+output: html_document
+---
+tout d'abord il faut installer les 3 packages (surtout shiny, car on l'a besoin pour créer l'application web interactive)
+
+```{r}
+install.packages("shiny")
+install.packages("readr")
+install.packages("shinythemes")
+library(shiny)
+library(readr)
+library(shinythemes)
+```
+
+
+```{r}
+# 1. CHARGEMENT DES DONNÉES
+donnees <- read.csv("~/Library/CloudStorage/OneDrive-etu.unistra.fr/travel_recommendations.csv", stringsAsFactors = FALSE)
+
+# 2. DICTIONNAIRES DE TRADUCTION
+# vu que le data set est en anglais, on voulais tout traduire en francais
+
+trad_cat <- c("Aventure" = "adventure", "Plages" = "beaches", "Culture" = "culture", 
+              "Désert" = "desert", "Forêt" = "forest", "Îles" = "islands", "Montagnes" = "mountains")
+trad_comp <- c("En couple" = "couple", "En famille" = "family", "Entre amis" = "friends", "Seul(e)" = "solo")
+trad_clim <- c("Froid/Doux" = "cold/mild", "Chaud/Sec" = "hot/dry", "Humide" = "humid", 
+               "Doux" = "mild", "Tropical" = "tropical", "Tropical/Chaud" = "tropical/warm", "Variable" = "variable")
+trad_frequent <- c("Animé" = "lively", "Modéré" = "Moderate", "Calme" = "quiet")
+trad_mois <- c("Janvier" = "January", "Février" = "February", "Mars" = "March", "Avril" = "April", 
+               "Mai" = "May", "Juin" = "June", "Juillet" = "July", "Août" = "August", 
+               "Septembre" = "September", "Octobre" = "October", "Novembre" = "November", "Décembre" = "December")
+trad_act <- c("Balades en bateau" = "boat rides", "Promenades à chameau" = "camel rides", 
+              "Parcours historiques" = "heritage walks", "Randonnée" = "hiking", 
+              "Visites de musées" = "museum tours", "Marches en pleine nature" = "nature walks", 
+              "Parapente" = "paragliding", "Rafting" = "rafting", "Sandboarding" = "sandboarding", 
+              "Snorkeling" = "snorkeling", "Baignade" = "swimming", "Trekking" = "trekking", 
+              "Safari photo" = "wildlife safari")
+
+# 3. INTERFACE UTILISATEUR (UI) 
+ui <- fluidPage(
+  theme = shinytheme("sandstone"),
+  
+  # Effet Confettis
+  tags$head(
+    tags$script(src = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"),
+    tags$script(HTML("window.onload = function() { confetti({particleCount: 100, spread: 70, origin: { y: 0.6 }}); };"))
+  ),
+
+  
+  titlePanel("🌍 Assistant Voyage Personnel"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      h4("✈️ Vos préférences"),
+      selectInput("cat", "Type de voyage :", choices = names(trad_cat)),
+      selectInput("comp", "Accompagnants :", choices = names(trad_comp)),
+      selectInput("mois", "Mois de départ :", choices = names(trad_mois)),
+      selectInput("clim", "Climat préféré :", choices = names(trad_clim)),
+      selectInput("freq", "Fréquentation :", choices = names(trad_frequent)),
+      selectInput("act", "Activité favorite :", choices = names(trad_act)),
+      hr(),
+      actionButton("go", "Trouver ma destination ✈️", class = "btn-success", width = "100%")
+    ),
+    
+    mainPanel(
+      h3("🏝️ Nos suggestions pour vous :"),
+      # Zone de message d'erreur personnalisée si rien n'est trouvé
+      uiOutput("message_vide"),
+      tableOutput("resultats"),
+      
+      # Filtres prioritaires
+      uiOutput("prio_ui")
+    )
+  )
+)
+
+# 4. LOGIQUE SERVEUR (SERVER)
+server <- function(input, output, session) {
+  valeurs <- reactiveValues(top_voyages = NULL, scores = NULL)
+  observeEvent(input$go, {
+# Traductions (on doit transformer le choix francais en anglais, valeur du dataset)
+    req_cat  <- trad_cat[input$cat]
+    req_comp <- trad_comp[input$comp]
+    req_mois <- trad_mois[input$mois]
+    req_clim <- trad_clim[input$clim]
+    req_freq <- trad_frequent[input$freq]
+    req_act  <- trad_act[input$act]
+
+    # Calcul du Score
+    scores <- rep(0, nrow(donnees))
+    scores <- scores + (tolower(donnees$category) == req_cat)
+    scores <- scores + (tolower(donnees$companions) == req_comp)
+    scores <- scores + (tolower(donnees$climate) == req_clim)
+    scores <- scores + (tolower(donnees$crowd_level) == req_freq)
+    scores <- scores + grepl(req_mois, donnees$best_months, ignore.case = TRUE)
+    scores <- scores + grepl(req_act, donnees$activities, ignore.case = TRUE)
+    
+    # Sélection du Top 3
+    top_indices <- order(scores, decreasing = TRUE)[1:3]
+    res <- donnees[top_indices, ]
+    
+    # Ajout de la colonne adéquation proprement
+    res$Adequation <- paste0(round((scores[top_indices] / 6) * 100), "%")
+    
+    valeurs$top_voyages <- res
+    valeurs$scores <- scores
+    
+    # Petit effet de succès
+    showNotification("Bon voyage ✈️!", type = "message")
+  })
+
+  # AFFICHAGE DU TABLEAU CORRIGÉ (Sans colonnes forcées)
+  output$resultats <- renderTable({
+    req(valeurs$top_voyages)
+    # On affiche tout le tableau sélectionné sans nommer les colonnes à la main
+    # Cela évite l'erreur "undefined columns"
+    valeurs$top_voyages
+  }, striped = TRUE, hover = TRUE, bordered = TRUE)
+
+  # UI des Filtres
+  output$prio_ui <- renderUI({
+    req(valeurs$top_voyages)
+    tagList(
+      hr(),
+      h4("⚙️ Pas satisfait ? Imposez 2 critères prioritaires"),
+      fluidRow(
+        column(6, selectInput("crit1", "Priorité 1", choices = list("Type de voyage"=1, "accompagnant"=2, "Mois"=3, "Climat"=4, "Fréquentation"=5, "Activité"=6))),
+        column(6, selectInput("crit2", "Priorité 2", choices = list("Type de voyage"=1, "accompagnant"=2, "Mois"=3, "Climat"=4, "Fréquentation"=5, "Activité"=6)))
+      ),
+      actionButton("prio_btn", "Appliquer le filtre strict", class = "btn-warning"),
+      br(), br(),
+      span(textOutput("prio_res"), style="font-weight:bold; font-size: 1.2em; color: #2c3e50;")
+    )
+  })
+
+  observeEvent(input$prio_btn, {
+    req(valeurs$scores)
+    
+    verifier <- function(idx, num) {
+      if (num == 1) return(tolower(donnees$category[idx]) == trad_cat[input$cat])
+      if (num == 2) return(tolower(donnees$companions[idx]) == trad_comp[input$comp])
+      if (num == 3) return(grepl(trad_mois[input$mois], donnees$best_months[idx], ignore.case = TRUE))
+      if (num == 4) return(tolower(donnees$climate[idx]) == trad_clim[input$clim])
+      if (num == 5) return(tolower(donnees$crowd_level[idx]) == trad_frequent[input$freq])
+      if (num == 6) return(grepl(trad_act[input$act], donnees$activities[idx], ignore.case = TRUE))
+      return(TRUE)
+    }
+
+    strict <- sapply(1:nrow(donnees), function(i) verifier(i, as.numeric(input$crit1)) && verifier(i, as.numeric(input$crit2)))
+
+    output$prio_res <- renderText({
+      if (any(strict)) {
+        possibilites <- donnees[strict, ]
+        best <- possibilites$destination[order(valeurs$scores[strict], decreasing = TRUE)[1]]
+        paste("🌟 La meilleure destination respectant strictement vos priorités est :", best)
+      } else {
+        "😕 Aucune destination trouvée, essayez d'autres critères"
+      }
+    })
+  })
+}
+
+shinyApp(ui, server)
+```
