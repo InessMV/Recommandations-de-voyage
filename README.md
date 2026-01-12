@@ -5,6 +5,7 @@ Un sondage révèlait que 6 Français sur 10 désiraient se rendre en vacances l
 Pour vous aider à choisir votre prochain lieu de vacances, nous avons réalisé un outil permettant d'aiguiller plus de 40 millions de Français à choisir leur destination en fonction de leurs critères.🚂
 
 Nous avons répertorié une base de données sur RStudio afin de créer un **Assistant de Voyage Personnel avec plusieurs facteurs**. 
+
 Pour que cet assistant puisse déterminer votre prochain lieu de vacances, il faut télécharger le script R et la base de données ci-joint. 
 Une fois installés, il suffit de lancer le modèle pour qu'une page s'ouvre vous demandant de renseigner vos différents critères. Vous recevrez alors une **liste de trois destinations** correspondant le mieux à vos attentes.  
 Pour affiner votre choix, un onglet permet de sélectionner les deux critères les plus pertinentes selon vos envies. 
