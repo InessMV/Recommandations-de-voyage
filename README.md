@@ -25,6 +25,6 @@ Une fois les trois destinations proposées, l’outil offre la possibilité de s
 
 De la part de l'Assistant de Voyage Personnel ainsi que de notre équipe, **nous vous souhaitons un excellent voyage** !
 
-Kantu Ralantomalala
-Lucas Rakotomalala
-Inês Magalhaes Vaz
+**Kantu Ralantomalala, 
+Lucas Rakotomalala, 
+Inês Magalhaes Vaz**
