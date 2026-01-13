@@ -24,3 +24,7 @@ Nous avons également mis un score exprimé en pourcentage pour indiquer la comp
 Une fois les trois destinations proposées, l’outil offre la possibilité de sélectionner les deux critères prioritaires, ce qui désigne la destination qui correspond le mieux à votre style de voyage
 
 De la part de l'Assistant de Voyage Personnel ainsi que de notre équipe, **nous vous souhaitons un excellent voyage** !
+
+Kantu Ralantomalala
+Lucas Rakotomalala
+Inês Magalhaes Vaz
